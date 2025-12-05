@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import profileService, { UpdateProfileData, ChangePasswordData } from '../../services/profile.service';
 
 const Profile: React.FC = () => {
-    const { user: authUser } = useAuth();
+    const { user: authUser, refreshUser } = useAuth();
     const [user, setUser] = useState(authUser);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -76,7 +76,7 @@ const Profile: React.FC = () => {
             setIsEditingProfile(false);
 
             // Update auth context
-            window.location.reload(); // Simple way to refresh auth context
+            await refreshUser();
         } catch (err: any) {
             setProfileError(err.response?.data?.message || 'Failed to update profile');
         } finally {

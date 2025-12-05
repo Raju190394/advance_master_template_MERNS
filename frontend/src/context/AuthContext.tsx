@@ -10,6 +10,7 @@ interface AuthContextType {
     logout: () => void;
     isAuthenticated: boolean;
     hasRole: (roles: string[]) => boolean;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,15 +20,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is already logged in
-        const storedUser = authService.getStoredUser();
-        const token = authService.getToken();
+        const initAuth = async () => {
+            const token = authService.getToken();
+            const storedUser = authService.getStoredUser();
 
-        if (storedUser && token) {
-            setUser(storedUser);
-        }
+            if (token) {
+                if (storedUser) {
+                    setUser(storedUser); // Optimistic update
+                }
+                try {
+                    const freshUser = await authService.getProfile();
+                    setUser(freshUser);
+                } catch (error) {
+                    console.error('Failed to fetch user profile:', error);
+                }
+            }
+            setLoading(false);
+        };
 
-        setLoading(false);
+        initAuth();
     }, []);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {
@@ -49,6 +60,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return roles.includes(user.role);
     };
 
+    const refreshUser = async () => {
+        try {
+            const userData = await authService.getProfile();
+            setUser(userData);
+        } catch (error) {
+            console.error('Failed to refresh user:', error);
+        }
+    };
+
     const value: AuthContextType = {
         user,
         loading,
@@ -56,6 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         isAuthenticated: !!user,
         hasRole,
+        refreshUser,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

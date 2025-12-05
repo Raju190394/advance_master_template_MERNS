@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
 import UserForm from './UserForm';
-import { Plus, Search, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 const UserList: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -15,6 +15,8 @@ const UserList: React.FC = () => {
 
     const [filters, setFilters] = useState<UserFilters>({
         search: '',
+        role: '',
+        status: '',
         page: 1,
         limit: 10,
     });
@@ -24,6 +26,14 @@ const UserList: React.FC = () => {
         limit: 10,
         total: 0,
         totalPages: 0,
+    });
+
+    const [sortConfig, setSortConfig] = useState<{
+        key: keyof User | '';
+        direction: 'asc' | 'desc';
+    }>({
+        key: '',
+        direction: 'asc',
     });
 
     const [showForm, setShowForm] = useState(false);
@@ -49,6 +59,10 @@ const UserList: React.FC = () => {
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilters({ ...filters, search: e.target.value, page: 1 });
+    };
+
+    const handleFilterChange = (key: keyof UserFilters, value: string) => {
+        setFilters({ ...filters, [key]: value, page: 1 });
     };
 
     const handlePageChange = (newPage: number) => {
@@ -82,13 +96,46 @@ const UserList: React.FC = () => {
         }
     };
 
+    const handleSort = (key: keyof User) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const sortedUsers = [...users].sort((a, b) => {
+        if (!sortConfig.key) return 0;
+
+        const key = sortConfig.key;
+        const aValue = a[key];
+        const bValue = b[key];
+
+        if (aValue === undefined || bValue === undefined) return 0;
+
+        if (aValue < bValue) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+
+    const SortIcon = ({ columnKey }: { columnKey: keyof User }) => {
+        if (sortConfig.key !== columnKey) return <ArrowUpDown className="w-4 h-4 ml-1 text-gray-400" />;
+        return sortConfig.direction === 'asc'
+            ? <ArrowUp className="w-4 h-4 ml-1 text-primary-600" />
+            : <ArrowDown className="w-4 h-4 ml-1 text-primary-600" />;
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-                    <p className="text-gray-600 mt-2">Manage system users and their roles</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Users</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Manage system users and their roles</p>
                 </div>
                 <Button onClick={handleCreateUser}>
                     <Plus className="w-4 h-4 mr-2" />
@@ -98,8 +145,8 @@ const UserList: React.FC = () => {
 
             {/* Filters */}
             <Card>
-                <div className="flex items-center gap-4">
-                    <div className="flex-1 relative">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-2 relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <Input
                             placeholder="Search by name or email..."
@@ -107,6 +154,29 @@ const UserList: React.FC = () => {
                             onChange={handleSearch}
                             className="pl-10"
                         />
+                    </div>
+                    <div>
+                        <select
+                            value={filters.role}
+                            onChange={(e) => handleFilterChange('role', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors border-gray-300 focus:border-primary-500 focus:ring-primary-500 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        >
+                            <option value="">All Roles</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select
+                            value={filters.status}
+                            onChange={(e) => handleFilterChange('status', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors border-gray-300 focus:border-primary-500 focus:ring-primary-500 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        >
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
                     </div>
                 </div>
             </Card>
@@ -134,19 +204,43 @@ const UserList: React.FC = () => {
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ID
+                                            S.No
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Name
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                                            onClick={() => handleSort('name')}
+                                        >
+                                            <div className="flex items-center">
+                                                Name
+                                                <SortIcon columnKey="name" />
+                                            </div>
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                                            onClick={() => handleSort('email')}
+                                        >
+                                            <div className="flex items-center">
+                                                Email
+                                                <SortIcon columnKey="email" />
+                                            </div>
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Role
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                                            onClick={() => handleSort('role')}
+                                        >
+                                            <div className="flex items-center">
+                                                Role
+                                                <SortIcon columnKey="role" />
+                                            </div>
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                                            onClick={() => handleSort('status')}
+                                        >
+                                            <div className="flex items-center">
+                                                Status
+                                                <SortIcon columnKey="status" />
+                                            </div>
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Actions
@@ -154,10 +248,10 @@ const UserList: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {users.map((user) => (
+                                    {sortedUsers.map((user, index) => (
                                         <tr key={user.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {user.id}
+                                                {(pagination.page - 1) * pagination.limit + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">{user.name}</div>
