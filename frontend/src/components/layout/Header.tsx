@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, User, Bell } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
@@ -18,9 +19,7 @@ const Header: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                         {/* Notifications */}
-                        <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
-                            <Bell className="w-5 h-5" />
-                        </button>
+                        <NotificationDropdown />
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700">

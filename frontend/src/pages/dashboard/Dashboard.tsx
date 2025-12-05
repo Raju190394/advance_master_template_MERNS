@@ -10,8 +10,7 @@ import {
     Shield,
     Clock,
     ArrowRight,
-    ArrowUpRight,
-    Bell
+    ArrowUpRight
 } from 'lucide-react';
 import {
     AreaChart,
@@ -109,10 +108,7 @@ const Dashboard: React.FC = () => {
                     <span className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm hidden sm:block">
                         {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
-                    <button className="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
-                    </button>
+
                     {hasRole(['admin', 'super_admin']) && (
                         <button
                             onClick={() => navigate('/users')}

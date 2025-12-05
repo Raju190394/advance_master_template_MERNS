@@ -17,5 +17,7 @@ router.use('/reports', reportRoutes);
 router.use('/dashboard', dashboardRoutes);
 import settingsRoutes from './settings.routes';
 router.use('/settings', settingsRoutes);
+import notificationRoutes from './notification.routes';
+router.use('/notifications', notificationRoutes);
 
 export default router;

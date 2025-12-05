@@ -4,6 +4,7 @@ import userService from '../services/user.service';
 import { AuthRequest } from '../types/express';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { createActivityLog } from '../utils/activityLogger';
+import socketService from '../services/socket.service';
 import { UserRole, UserStatus } from '@prisma/client';
 
 const createUserSchema = z.object({
@@ -39,6 +40,13 @@ class UserController {
                 description: `Created user ${user.name} (${user.email})`,
                 req,
             });
+
+            // Notify admins
+            await socketService.sendToAdmins(
+                'New User Registered',
+                `User ${user.name} (${user.role}) has been created by ${req.user!.name}.`,
+                'success'
+            );
 
             res.status(201).json(
                 successResponse('User created successfully', user)

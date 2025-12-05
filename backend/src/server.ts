@@ -4,6 +4,8 @@ import env from './config/env';
 import { connectMongoDB, disconnectDatabases } from './config/db';
 import logger from './utils/logger';
 
+import socketService from './services/socket.service';
+
 const PORT = parseInt(env.PORT);
 
 async function startServer() {
@@ -17,6 +19,9 @@ async function startServer() {
             logger.info(` Environment: ${env.NODE_ENV}`);
             logger.info(`CORS Origin: ${env.CORS_ORIGIN}`);
         });
+
+        // Initialize Socket.io
+        socketService.initialize(server);
 
         // Graceful shutdown
         const gracefulShutdown = async (signal: string) => {
