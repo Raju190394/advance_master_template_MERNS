@@ -26,7 +26,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
-app.use('/avatars', express.static(path.join(process.cwd(), 'uploads/avatars')));
+app.use('/uploads/avatars', express.static(path.join(process.cwd(), 'uploads/avatars')));
+app.use('/uploads/students', express.static(path.join(process.cwd(), 'uploads/students')));
 
 // Health check endpoint
 app.get('/health', (_req: express.Request, res: express.Response) => {

@@ -19,5 +19,7 @@ import settingsRoutes from './settings.routes';
 router.use('/settings', settingsRoutes);
 import notificationRoutes from './notification.routes';
 router.use('/notifications', notificationRoutes);
+import studentRoutes from './student.routes';
+router.use('/students', studentRoutes);
 
 export default router;

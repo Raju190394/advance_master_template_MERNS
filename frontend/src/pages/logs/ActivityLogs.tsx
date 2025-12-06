@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import { Search, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
+import Pagination from '../../components/ui/Pagination';
+import { Search, Activity } from 'lucide-react';
 
 interface ActivityLog {
     _id: string;
@@ -164,6 +164,7 @@ const ActivityLogs: React.FC = () => {
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Module</th>
@@ -173,8 +174,11 @@ const ActivityLogs: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {logs.map((log) => (
+                                    {logs.map((log, index) => (
                                         <tr key={log._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {(pagination.page - 1) * pagination.limit + index + 1}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">{log.name}</div>
                                                 <div className="text-xs text-gray-500 capitalize">{(log.role || '').replace('_', ' ')}</div>
@@ -203,34 +207,13 @@ const ActivityLogs: React.FC = () => {
                         </div>
 
                         {/* Pagination */}
-                        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                            <div className="text-sm text-gray-700">
-                                Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-                                {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                                {pagination.total} results
-                            </div>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                    disabled={pagination.page === 1}
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                </Button>
-                                <span className="px-4 py-2 text-sm text-gray-700">
-                                    Page {pagination.page} of {pagination.totalPages}
-                                </span>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                    disabled={pagination.page === pagination.totalPages}
-                                >
-                                    <ChevronRight className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            totalItems={pagination.total}
+                            limit={pagination.limit}
+                            onPageChange={handlePageChange}
+                        />
                     </>
                 )}
             </Card>

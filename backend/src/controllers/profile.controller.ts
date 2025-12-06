@@ -44,7 +44,7 @@ class ProfileController {
             if (req.file) {
                 // Store relative path or full URL depending on your preference. 
                 // Here we store the relative path 'avatars/filename'
-                updateData.avatar = `avatars/${req.file.filename}`;
+                updateData.avatar = `uploads/avatars/${req.file.filename}`;
             }
 
             const user = await profileService.updateProfile(userId, updateData);

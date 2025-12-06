@@ -56,6 +56,25 @@ model Notification {
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+
   @@index([userId])
   @@map("notifications")
+}
+
+model Student {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(255)
+  fatherName    String   @db.VarChar(255)
+  qualification String   @db.VarChar(255)
+  gender        String   @db.VarChar(50)
+  courses       String   @db.Text
+  mobileNo      String   @db.VarChar(20)
+  photo         String?  @db.VarChar(255)
+  documents     String?  @db.Text
+  address       String   @db.Text
+  totalAmount   Float    @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("students")
 }

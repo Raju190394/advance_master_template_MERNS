@@ -14,6 +14,7 @@ import Reports from './pages/reports/Reports';
 import UserReport from './pages/reports/UserReport';
 import Settings from './pages/settings/Settings';
 import Notifications from './pages/notifications/Notifications';
+import StudentList from './pages/students/StudentList';
 
 const App: React.FC = () => {
     return (
@@ -103,12 +104,24 @@ const App: React.FC = () => {
                                 }
                             />
 
+
                             <Route
                                 path="/reports/user/:userId"
                                 element={
                                     <ProtectedRoute roles={['super_admin']}>
                                         <MainLayout>
                                             <UserReport />
+                                        </MainLayout>
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/students"
+                                element={
+                                    <ProtectedRoute roles={['admin', 'super_admin']}>
+                                        <MainLayout>
+                                            <StudentList />
                                         </MainLayout>
                                     </ProtectedRoute>
                                 }

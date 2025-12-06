@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
     LayoutDashboard,
@@ -9,6 +9,8 @@ import {
     ChevronRight,
     Activity,
     BarChart,
+    ChevronDown,
+    Briefcase
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -17,17 +19,33 @@ interface NavItem {
     path: string;
     icon: React.ReactNode;
     roles?: string[];
+    children?: NavItem[];
 }
 
 const Sidebar: React.FC = () => {
     const { hasRole } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
+    const location = useLocation();
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(['/management']);
 
     const navItems: NavItem[] = [
         {
             name: 'Dashboard',
             path: '/dashboard',
             icon: <LayoutDashboard className="w-5 h-5" />,
+        },
+        {
+            name: 'Management',
+            path: '/management',
+            icon: <Briefcase className="w-5 h-5" />,
+            roles: ['admin', 'super_admin'],
+            children: [
+                {
+                    name: 'Students',
+                    path: '/students',
+                    icon: <Users className="w-5 h-5" />,
+                }
+            ]
         },
         {
             name: 'Users',
@@ -54,10 +72,92 @@ const Sidebar: React.FC = () => {
         },
     ];
 
-    const filteredNavItems = navItems.filter((item) => {
-        if (!item.roles) return true;
-        return hasRole(item.roles);
-    });
+    const toggleMenu = (path: string) => {
+        if (expandedMenus.includes(path)) {
+            setExpandedMenus(expandedMenus.filter(p => p !== path));
+        } else {
+            setExpandedMenus([...expandedMenus, path]);
+        }
+    };
+
+    const renderNavItem = (item: NavItem) => {
+        if (item.roles && !hasRole(item.roles)) return null;
+
+        if (item.children) {
+            const isExpanded = expandedMenus.includes(item.path);
+            const isActive = item.children.some(child => location.pathname === child.path);
+
+            return (
+                <div key={item.path}>
+                    <button
+                        onClick={() => {
+                            if (collapsed) setCollapsed(false);
+                            toggleMenu(item.path);
+                        }}
+                        className={clsx(
+                            'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full text-left',
+                            isActive
+                                ? 'text-primary-400 bg-gray-800/50'
+                                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                        )}
+                        title={collapsed ? item.name : undefined}
+                    >
+                        {item.icon}
+                        {!collapsed && (
+                            <>
+                                <span className="font-medium flex-1">{item.name}</span>
+                                <ChevronDown
+                                    className={clsx(
+                                        'w-4 h-4 transition-transform',
+                                        isExpanded ? 'rotate-180' : ''
+                                    )}
+                                />
+                            </>
+                        )}
+                    </button>
+                    {!collapsed && isExpanded && (
+                        <div className="pl-12 space-y-1 mt-1">
+                            {item.children.map(child => (
+                                <NavLink
+                                    key={child.path}
+                                    to={child.path}
+                                    className={({ isActive }) =>
+                                        clsx(
+                                            'block py-2 px-3 text-sm rounded-lg transition-colors',
+                                            isActive
+                                                ? 'text-white bg-primary-600'
+                                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                        )
+                                    }
+                                >
+                                    {child.name}
+                                </NavLink>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                    clsx(
+                        'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                        isActive
+                            ? 'bg-primary-600 text-white'
+                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    )
+                }
+                title={collapsed ? item.name : undefined}
+            >
+                {item.icon}
+                {!collapsed && <span className="font-medium">{item.name}</span>}
+            </NavLink>
+        );
+    };
 
     return (
         <aside
@@ -89,24 +189,7 @@ const Sidebar: React.FC = () => {
 
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-                {filteredNavItems.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            clsx(
-                                'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-                                isActive
-                                    ? 'bg-primary-600 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            )
-                        }
-                        title={collapsed ? item.name : undefined}
-                    >
-                        {item.icon}
-                        {!collapsed && <span className="font-medium">{item.name}</span>}
-                    </NavLink>
-                ))}
+                {navItems.map(renderNavItem)}
             </nav>
 
             {/* Footer */}

@@ -6,7 +6,8 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
 import UserForm from './UserForm';
-import { Plus, Search, Edit, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import Pagination from '../../components/ui/Pagination';
+import { Plus, Search, Edit, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 const UserList: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -284,34 +285,13 @@ const UserList: React.FC = () => {
                         </div>
 
                         {/* Pagination */}
-                        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                            <div className="text-sm text-gray-700">
-                                Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-                                {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                                {pagination.total} results
-                            </div>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                    disabled={pagination.page === 1}
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                </Button>
-                                <span className="px-4 py-2 text-sm text-gray-700">
-                                    Page {pagination.page} of {pagination.totalPages}
-                                </span>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                    disabled={pagination.page === pagination.totalPages}
-                                >
-                                    <ChevronRight className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            totalItems={pagination.total}
+                            limit={pagination.limit}
+                            onPageChange={handlePageChange}
+                        />
                     </>
                 )}
             </Card>
